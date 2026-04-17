@@ -2,7 +2,11 @@ const { app, ipcMain, BrowserWindow } = require("electron");
 const { execSync } = require("node:child_process");
 const path = require("node:path");
 
-let isFirstLoginTry = true;
+// Tracks whether the first login attempt has fired for a given webContents.
+// Keyed per-webContents (WeakMap) so concurrent logins across multiple
+// profiles/partitions do not stomp a shared flag; entries are collected
+// when the webContents is destroyed.
+const loginTryState = new WeakMap();
 
 exports.loginService = function loginService(parentWindow, callback) {
   let win = new BrowserWindow({
@@ -39,8 +43,10 @@ exports.handleLoginDialogTry = function handleLoginDialogTry(
 ) {
   window.webContents.on("login", (event, _request, _authInfo, callback) => {
     event.preventDefault();
-    if (isFirstLoginTry) {
-      isFirstLoginTry = false;
+    const webContents = window.webContents;
+    const isFirstTry = loginTryState.get(webContents) !== false;
+    if (isFirstTry) {
+      loginTryState.set(webContents, false);
       if (ssoBasicAuthUser && ssoBasicAuthPasswordCommand) {
         console.debug('[SSO] Retrieving password using configured command');
         try {
@@ -57,8 +63,8 @@ exports.handleLoginDialogTry = function handleLoginDialogTry(
         this.loginService(window, callback);
       }
     } else {
-      // if fails to authenticate we need to relanch the app as we have close the login browser window.
-      isFirstLoginTry = true;
+      // if fails to authenticate we need to relaunch the app as we have closed the login browser window.
+      loginTryState.delete(webContents);
       app.relaunch();
       app.exit(0);
     }
