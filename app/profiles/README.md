@@ -10,7 +10,7 @@ Design details and the decision trail are in [ADR-020](../../docs-site/docs/deve
 - **Active-profile tracking**: `setActive`, `getActive`, `getActiveId`
 - **Legacy migration**: `bootstrapIfEmpty()` imports a pre-feature install as Profile 0 with no login loss
 - **Stable partition identity**: each profile's partition string (`persist:teams-profile-{uuid}`) is generated once and never changes
-- **IPC surface**: registers the nine `profile-*` channels consumed by the renderer switcher UI
+- **IPC surface**: registers the six `profile-*` channels (`profile-list`, `profile-get-active`, `profile-switch`, `profile-add`, `profile-update`, `profile-remove`) consumed by the renderer switcher UI
 
 ## Persistence
 
