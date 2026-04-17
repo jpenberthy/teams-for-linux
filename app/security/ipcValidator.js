@@ -17,7 +17,15 @@ const allowedChannels = new Set([
   // Zoom and display controls
   'get-zoom-level',
   'save-zoom-level',
-  
+
+  // Multi-account profiles (ADR-020)
+  'profile-list',
+  'profile-get-active',
+  'profile-switch',
+  'profile-add',
+  'profile-update',
+  'profile-remove',
+
   // Screen sharing and desktop capture (sorted alphabetically)
   'cancel-desktop-media',
   'choose-desktop-media',

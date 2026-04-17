@@ -20,6 +20,7 @@ const CustomNotificationManager = require("./notificationSystem");
 const QuickChatManager = require("./quickChat");
 const ScreenSharingService = require("./screenSharing/service");
 const PartitionsManager = require("./partitions/manager");
+const { ProfilesManager } = require("./profiles/manager");
 const IdleMonitor = require("./idle/monitor");
 const AutoUpdater = require("./autoUpdater");
 const os = require("node:os");
@@ -115,6 +116,11 @@ const screenSharingService = new ScreenSharingService();
 // Initialize partitions manager with dependencies
 const partitionsManager = new PartitionsManager(appConfig.settingsStore);
 
+// Initialize profiles manager; bootstrap a Profile 0 on first run so existing
+// installs inherit the legacy "persist:teams-4-linux" partition without loss.
+const profilesManager = new ProfilesManager(appConfig.settingsStore);
+profilesManager.bootstrapIfEmpty();
+
 // Initialize idle monitor with dependencies
 const idleMonitor = new IdleMonitor(config, getUserStatus);
 
@@ -184,6 +190,9 @@ if (gotTheLock) {
 
   // Initialize partitions manager IPC handlers
   partitionsManager.initialize();
+
+  // Initialize profiles manager IPC handlers (profile-list, profile-switch, etc.)
+  profilesManager.initialize();
 
   // Initialize idle monitor IPC handlers
   idleMonitor.initialize();
